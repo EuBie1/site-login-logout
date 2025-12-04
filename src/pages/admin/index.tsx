@@ -1,5 +1,4 @@
-import type { FormEvent } from 'react';
-import { useState, useEffect } from 'react';
+import { FormEvent, useState, useEffect } from 'react'
 import { Header } from "../../components/Header";
 import { Input } from "../../components/Input";
 
@@ -14,7 +13,6 @@ import {
   doc,
   deleteDoc,
 } from 'firebase/firestore'
-
 
 interface LinkProps{
   id: string;

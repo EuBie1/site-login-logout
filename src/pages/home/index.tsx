@@ -29,11 +29,7 @@ interface SocialLinksProps{
 
 export function Home(){
   const [links, setLinks] = useState<LinkProps[]>([]);
-  const [socialLinks, setSocialLinks] = useState<SocialLinksProps>({
-  facebook: "#",
-  youtube: "#",
-  instagram: "https://www.instagram.com/m_.biel?igsh=MXdvZTZpcXVqYmMwaw=="
-})
+  const [socialLinks, setSocialLinks] = useState<SocialLinksProps>()
 
   useEffect(()=> {
     function loadLinks(){
@@ -93,19 +89,17 @@ export function Home(){
 
       <main className="flex flex-col w-11/12 max-w-xl text-center">
         {links.map((link) => (
-  <section
-    key={link.id}
-    className="mb-4 w-full rounded-lg select-none cursor-pointer transform transition-transform duration-300 hover:scale-105"
-    style={{ backgroundColor: link.bg }}
-  >
-    <a href={link.url} target="_blank" rel="noopener noreferrer" className="block w-full py-2 text-center">
-      <p className="text-base md:text-lg" style={{ color: link.color }}>
-        {link.name}
-      </p>
-    </a>
-  </section>
-))}
-
+        <section 
+        style={{ backgroundColor: link.bg }}
+        key={link.id}
+        className="bg-white mb-4 w-full py-2 rounded-lg select-none transition-transform hover:scale-105 cursor-pointer">
+          <a href={link.url} target="_blank">
+            <p className="text-base md:text-lg" style={{ color: link.color }}>
+              {link.name}
+            </p>
+          </a>
+        </section>
+        ))}
 
         { socialLinks && Object.keys(socialLinks).length > 0 && (
           <footer className="flex justify-center gap-3 my-4">
