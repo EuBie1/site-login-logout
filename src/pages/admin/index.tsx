@@ -1,9 +1,10 @@
-import { FormEvent, useState, useEffect } from 'react'
+import type { FormEvent } from 'react';
+import { useState, useEffect } from 'react';
 import { Header } from "../../components/Header";
 import { Input } from "../../components/Input";
 
-import { FiTrash } from 'react-icons/fi'
-import { db } from '../../services/firebaseConnection'
+import { FiTrash } from 'react-icons/fi';
+import { db } from '../../services/firebaseConnection';
 import {
   addDoc,
   collection,
@@ -12,7 +13,8 @@ import {
   orderBy,
   doc,
   deleteDoc,
-} from 'firebase/firestore'
+} from 'firebase/firestore';
+
 
 interface LinkProps{
   id: string;
