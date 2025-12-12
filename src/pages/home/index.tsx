@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
-import { Social } from '../../components/Social'
 
+import { Social } from '../../components/Social'
 import { FaFacebook, FaInstagram, FaYoutube } from 'react-icons/fa'
 import { db } from '../../services/firebaseConnection'
 import {
@@ -9,116 +9,143 @@ import {
   orderBy,
   query,
   doc,
-  getDoc
+  getDoc,
 } from 'firebase/firestore'
+import type { LinkProps, SocialLinksProps } from '../../types'
 
-interface LinkProps{
-  id: string;
-  name: string;
-  url: string;
-  bg: string;
-  color: string;
-}
-
-interface SocialLinksProps{
-  facebook: string;
-  youtube: string;
-  instagram: string;
-}
-
-
-export function Home(){
-  const [links, setLinks] = useState<LinkProps[]>([]);
+export function Home() {
+  const [links, setLinks] = useState<LinkProps[]>([])
   const [socialLinks, setSocialLinks] = useState<SocialLinksProps>()
-
-  useEffect(()=> {
-    function loadLinks(){
-      const linksRef = collection(db, "links")
-      const queryRef = query(linksRef, orderBy("created", "asc"))
-
-      getDocs(queryRef)
-      .then((snapshot) => {
-        let lista = [] as LinkProps[];
-
-        snapshot.forEach((doc) => {
-          lista.push({
-            id: doc.id,
-            name: doc.data().name,
-            url: doc.data().url,
-            bg: doc.data().bg,
-            color: doc.data().color,
-          })
-        })
-
-        setLinks(lista);
-
-      })
-
-
-    }
-
-    loadLinks();
-  }, [])
-
+  const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
-    function loadSocialLinks(){
-      const docRef = doc(db, "social", "link")
+    function loadLinks() {
+      const linksRef = collection(db, 'links')
+      const queryRef = query(linksRef, orderBy('created', 'asc'))
 
-      getDoc(docRef)
-      .then((snapshot) => {
-          if(snapshot.data() !== undefined){
-            setSocialLinks({
-              facebook: snapshot.data()?.facebook,
-              instagram: snapshot.data()?.instagram,
-              youtube: snapshot.data()?.youtube,
+      getDocs(queryRef)
+        .then((snapshot) => {
+          const lista: LinkProps[] = []
+
+          snapshot.forEach((doc) => {
+            const data = doc.data()
+            lista.push({
+              id: doc.id,
+              name: data.name,
+              url: data.url,
+              bg: data.bg,
+              color: data.color,
             })
-          }
-      })
+          })
+
+          setLinks(lista)
+        })
+        .catch((error) => {
+          console.error('Erro ao carregar links:', error)
+        })
+        .finally(() => {
+          setIsLoading(false)
+        })
     }
 
-    loadSocialLinks();
-
+    loadLinks()
   }, [])
 
+  useEffect(() => {
+    function loadSocialLinks() {
+      const docRef = doc(db, 'social', 'link')
 
-  return(
-    <div className="flex flex-col w-full py-4 items-center justify-center">
-      <h1 className="md:text-4xl  text-3xl font-bold text-white mt-20">Sujeito Programador</h1>
-      <span className="text-gray-50 mb-5 mt-3">Veja meus links 👇</span>
+      getDoc(docRef)
+        .then((snapshot) => {
+          if (snapshot.exists() && snapshot.data()) {
+            const data = snapshot.data()
+            setSocialLinks({
+              facebook: data.facebook || '',
+              instagram: data.instagram || '',
+              youtube: data.youtube || '',
+            })
+          }
+        })
+        .catch((error) => {
+          console.error('Erro ao carregar redes sociais:', error)
+        })
+    }
 
-      <main className="flex flex-col w-11/12 max-w-xl text-center">
-        {links.map((link) => (
-        <section 
-        style={{ backgroundColor: link.bg }}
-        key={link.id}
-        className="bg-white mb-4 w-full py-2 rounded-lg select-none transition-transform hover:scale-105 cursor-pointer">
-          <a href={link.url} target="_blank">
-            <p className="text-base md:text-lg" style={{ color: link.color }}>
-              {link.name}
-            </p>
-          </a>
-        </section>
-        ))}
+    loadSocialLinks()
+  }, [])
 
-        { socialLinks && Object.keys(socialLinks).length > 0 && (
-          <footer className="flex justify-center gap-3 my-4">
-            <Social url={socialLinks?.facebook}>
-              <FaFacebook size={35} color="#FFF" />
-            </Social>
-  
-            <Social url={socialLinks?.youtube}>
-              <FaYoutube size={35} color="#FFF" />
-            </Social>
-  
-            <Social url={socialLinks?.instagram}>
-              <FaInstagram size={35} color="#FFF" />
-            </Social>
-          </footer>
+  const hasSocialLinks =
+    socialLinks &&
+    (socialLinks.facebook || socialLinks.instagram || socialLinks.youtube)
+
+  return (
+    <div className="flex flex-col w-full min-h-screen py-4 items-center justify-center px-4">
+      <header className="text-center mb-8 mt-8 sm:mt-20">
+        <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white">
+          Sujeito Programador
+        </h1>
+        <p className="text-gray-50 mb-5 mt-3 text-base sm:text-lg">
+          Veja meus links 👇
+        </p>
+      </header>
+
+      <main className="flex flex-col w-full max-w-xl text-center">
+        {isLoading ? (
+          <p className="text-white text-lg" aria-live="polite">
+            Carregando links...
+          </p>
+        ) : links.length === 0 ? (
+          <p className="text-gray-400 text-lg" aria-live="polite">
+            Nenhum link disponível no momento.
+          </p>
+        ) : (
+          <nav aria-label="Links principais">
+            <ul className="flex flex-col gap-4">
+              {links.map((link) => (
+                <li key={link.id}>
+                  <a
+                    href={link.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="block w-full py-3 px-4 rounded-lg select-none transition-all duration-200 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-white/50 cursor-pointer"
+                    style={{
+                      backgroundColor: link.bg,
+                      color: link.color,
+                    }}
+                    aria-label={`Abrir link: ${link.name}`}
+                  >
+                    <span className="text-base sm:text-lg font-medium">
+                      {link.name}
+                    </span>
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </nav>
         )}
 
-      </main>
+        {hasSocialLinks && (
+          <footer className="flex justify-center gap-4 sm:gap-6 my-8" aria-label="Redes sociais">
+            {socialLinks.facebook && (
+              <Social url={socialLinks.facebook} ariaLabel="Abrir perfil do Facebook">
+                <FaFacebook size={32} color="#FFF" />
+              </Social>
+            )}
 
+            {socialLinks.youtube && (
+              <Social url={socialLinks.youtube} ariaLabel="Abrir canal do YouTube">
+                <FaYoutube size={32} color="#FFF" />
+              </Social>
+            )}
+
+            {socialLinks.instagram && (
+              <Social url={socialLinks.instagram} ariaLabel="Abrir perfil do Instagram">
+                <FaInstagram size={32} color="#FFF" />
+              </Social>
+            )}
+          </footer>
+        )}
+      </main>
     </div>
   )
 }
