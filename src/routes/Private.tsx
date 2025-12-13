@@ -1,4 +1,4 @@
-import { ReactNode, useState, useEffect } from 'react'
+import { ReactNode, useState, useEffect, ReactElement } from 'react'
 
 import { auth } from '../services/firebaseConnection'
 import { onAuthStateChanged } from 'firebase/auth'
@@ -12,7 +12,7 @@ interface PrivateProps {
 /**
  * Componente que protege rotas privadas, verificando autenticação
  */
-export function Private({ children }: PrivateProps): JSX.Element {
+export function Private({ children }: PrivateProps): ReactElement {
   const [loading, setLoading] = useState(true)
   const [signed, setSigned] = useState(false)
 
